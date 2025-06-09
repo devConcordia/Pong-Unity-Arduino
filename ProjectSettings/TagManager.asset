@@ -4,8 +4,12 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Ground
-  - Boomerang
+  - Wall
+  - Ball
+  - GoalLeft
+  - GoalRight
+  - PlayerLeft
+  - PlayerRight
   layers:
   - Default
   - TransparentFX
