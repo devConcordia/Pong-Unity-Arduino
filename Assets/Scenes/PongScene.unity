@@ -212,7 +212,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &202710770
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -447,9 +447,9 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0
 --- !u!114 &281878165
 MonoBehaviour:
@@ -476,7 +476,7 @@ GameObject:
   - component: {fileID: 466779682}
   - component: {fileID: 466779681}
   m_Layer: 5
-  m_Name: RestartMessage
+  m_Name: HelperMessage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1285,6 +1285,7 @@ MonoBehaviour:
   Scoreboard: {fileID: 1578109596}
   managerCanvas: {fileID: 202710769}
   GameMessage: {fileID: 528385989}
+  GameHelper: {fileID: 466779679}
 --- !u!4 &783926609
 Transform:
   m_ObjectHideFlags: 0
@@ -1637,7 +1638,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5997f7fefd029534dbcf636505401ffb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2
+  speed: 3.5
 --- !u!1 &1478829287
 GameObject:
   m_ObjectHideFlags: 0
@@ -1810,9 +1811,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1484321417}
   - component: {fileID: 1484321416}
-  - component: {fileID: 1484321419}
   - component: {fileID: 1484321418}
   - component: {fileID: 1484321420}
+  - component: {fileID: 1484321421}
   m_Layer: 0
   m_Name: PlayerRight
   m_TagString: PlayerRight
@@ -1917,8 +1918,22 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 5
---- !u!61 &1484321419
-BoxCollider2D:
+--- !u!114 &1484321420
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1484321415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2a68fe9e9e453b48bb0c2343d5bea0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ball: {fileID: 281878160}
+  speed: 3.5
+--- !u!60 &1484321421
+PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1961,22 +1976,13 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
---- !u!114 &1484321420
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1484321415}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f2a68fe9e9e453b48bb0c2343d5bea0d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ball: {fileID: 281878160}
-  speed: 2
+  m_Points:
+    m_Paths:
+    - - {x: -0.3150406, y: 0.4471544}
+      - {x: -0.2886181, y: -0.44275057}
+      - {x: 0.5, y: -0.5}
+      - {x: 0.5, y: 0.5}
+  m_UseDelaunayMesh: 0
 --- !u!1 &1578109596
 GameObject:
   m_ObjectHideFlags: 0

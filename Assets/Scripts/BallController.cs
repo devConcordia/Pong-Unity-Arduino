@@ -5,6 +5,7 @@ public class BallController : MonoBehaviour
 	
 	public float speed = 5f;
 	private Rigidbody2D body;
+	private Vector2 lastVelocity;
 	
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -14,6 +15,13 @@ public class BallController : MonoBehaviour
         
     }
 	
+	
+    void Update()
+    {
+        // Guardamos a última velocidade para refletir corretamente
+        lastVelocity = body.linearVelocity;
+    }
+	
 	public void reset() {
 		
 		body.linearVelocity = new Vector2(0f,0f);
@@ -21,49 +29,62 @@ public class BallController : MonoBehaviour
 		
 	}
 	
-	public void throwRight() {
+	public void start() {
 		
-		body.linearVelocityY = speed;
-		body.linearVelocityX = speed;
+		body.linearVelocity = new Vector2(Random.Range(-1f, 1f), 1).normalized * speed;
 		
 	}
 	
-	public void throwLeft() {
-		
-		body.linearVelocityX = -speed;
-		body.linearVelocityY = speed;
-		
-	}
 	
 	private void OnCollisionEnter2D( Collision2D collision ) {
 		
+	//	Vector2 direction = Vector2.Reflect(body.linearVelocity.normalized, collision.contacts[0].normal);
+		
+        // Pega a normal do ponto de colisão
+        Vector2 normal = collision.contacts[0].normal;
+
+        // Reflete a velocidade usando a normal
+        Vector2 direction = Vector2.Reflect(lastVelocity.normalized, normal);
+		
+		body.linearVelocity = direction * speed;
+		
+		if( collision.gameObject.CompareTag("GoalLeft") ) {
+			
+			GameManager.Instance.addRightPoint();
+			
+		} else if( collision.gameObject.CompareTag("GoalRight") ) {
+			
+			GameManager.Instance.addLeftPoint();
+			
+		}
+		
+		
+		
+	/*	Vector2 dir = new Vector2(0f,0f);
+		
 		if( collision.gameObject.CompareTag("PlayerLeft") ) {
 			
-			Vector2 dir = Vector2.Reflect( body.linearVelocity.normalized, new Vector2(-1.0f, 0f ) );
-			
-			body.linearVelocity = dir * speed;
+			dir = Vector2.Reflect( body.linearVelocity.normalized, new Vector2( 1f, 0f ) );
 			
 		} else if( collision.gameObject.CompareTag("PlayerRight") ) {
 			
-			Vector2 dir = Vector2.Reflect( body.linearVelocity.normalized, new Vector2( 1.0f, 0f ) );
-			
-			Debug.Log( dir );
-			
-			body.linearVelocity = dir * speed;
+			dir = Vector2.Reflect( body.linearVelocity.normalized, new Vector2( -1f, 0f ) );
 			
 		} else if( collision.gameObject.CompareTag("Wall") ) {
 			
-			float y = (collision.gameObject.transform.position.y > 0f)? 1f : -1f;
+			float y = (collision.gameObject.transform.position.y > 0f)? -1f : 1f;
 			
-			Debug.Log( body.linearVelocity.normalized );
+			dir = Vector2.Reflect(body.linearVelocity.normalized, new Vector2( 0f, y ));
+		//	dir = Vector2.Reflect(body.linearVelocity.normalized, collision.contacts[0].normal);
 			
-			Vector2 dir = Vector2.Reflect( body.linearVelocity.normalized, new Vector2( 0f, y ) );
-			
-			Debug.Log( dir );
-			
-			body.linearVelocity = dir * speed;
 			
 		}
+		
+		
+		body.linearVelocity = dir * speed;
+		
+		
+	/**/
 		
 	}
 	

@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using TMPro;
 
-public class GamaManager : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
 	
 	[SerializeField] public GameObject ball;
@@ -18,13 +18,15 @@ public class GamaManager : MonoBehaviour
 	
 	[SerializeField] public GameObject managerCanvas;
 	[SerializeField] public GameObject GameMessage;
+	[SerializeField] public GameObject GameHelper;
 	private TMP_Text textGameMessage;
+//	private TMP_Text textGameHelper;
 	
 	
 	
-	public static GamaManager Instance = null;
+	public static GameManager Instance = null;
 	
-	private bool playing = false;
+	public bool playing = false;
 	
     private void Awake() {
 		
@@ -42,11 +44,12 @@ public class GamaManager : MonoBehaviour
         
 		textScoreboard = Scoreboard.GetComponent<TMP_Text>();
 		textGameMessage = GameMessage.GetComponent<TMP_Text>();
+	//	textGameHelper = GameHelper.GetComponent<TMP_Text>();
 		
 		ballCtrl = ball.GetComponent<BallController>();
 
-		playing = false;
-        Time.timeScale = .00001f;
+	//	playing = false;
+    //   Time.timeScale = .00001f;
 		
 		prepareGame();
 		
@@ -69,10 +72,8 @@ public class GamaManager : MonoBehaviour
 		hudCanvas.SetActive(true);
 		managerCanvas.SetActive(false);
 		
-		setScoreboard( 0, 0 );
-		
 		ballCtrl.reset();
-		ballCtrl.throwRight();
+		ballCtrl.start();
 		
 	}
 	
@@ -81,6 +82,7 @@ public class GamaManager : MonoBehaviour
 		textGameMessage.text = message;
 		
 		managerCanvas.SetActive(true);
+		GameHelper.SetActive(true);
 		
 		playing = false;
         Time.timeScale = .00001f;
@@ -92,6 +94,12 @@ public class GamaManager : MonoBehaviour
 		hudCanvas.SetActive(false);
 		managerCanvas.SetActive(true);
 		
+		ballCtrl.reset();
+		
+		scoreLeft = 0;
+		scoreRight = 0;
+		updateScoreboard();
+		
 		playing = true;
         Time.timeScale = 1f;
 		
@@ -101,48 +109,61 @@ public class GamaManager : MonoBehaviour
 	
     IEnumerator startGameCountdown() {
         
-		Debug.Log("startGameCountdown");
+		//textGameMessage.text = "Prepara ...";
 		
-		textGameMessage.text = "Prepara ...";
+		GameHelper.SetActive(false);
 		
-		yield return new WaitForSeconds(3f);
-        startGame();
+		int currentTime = 3;
+
+        while( currentTime > 0 ) {
+           
+			textGameMessage.text = currentTime.ToString();
+            yield return new WaitForSeconds(1f);
+            
+			currentTime--;
+        
+		}
+
+        textGameMessage.text = "GO!";
+		yield return new WaitForSeconds(1f);
+        
+		
+		startGame();
 		
     }
 	
 	
-	public void setScoreboard( int left, int right ) {
+	public void updateScoreboard() {
 		
-		textScoreboard.text = left +" x "+ right;
+		textScoreboard.text = scoreLeft +" x "+ scoreRight;
+		
+		if( scoreLeft >= 2 ) {
+			
+			endGame( "Parabéns! Você ganhou!" );
+			
+		} else if( scoreRight >= 2 ) {
+			
+			endGame( "Não foi dessa vez ..." );
+			
+		} else {
+			
+			if( playing ) startGame();
+			
+		}
 		
 	}
 	
 	public void addLeftPoint() {
 		
 		scoreLeft++;
-		
-		setScoreboard( scoreLeft, scoreRight );
+		updateScoreboard();
 		
 	}
 	
 	public void addRightPoint() {
 		
 		scoreRight++;
-		
-		setScoreboard( scoreLeft, scoreRight );
-		
-	}
-	
-	
-	public static void GoodGame() {
-		
-		Instance.endGame( "Parabéns!" );
-		
-	}
-	
-	public static void GameOver() {
-		
-		Instance.endGame( "Você perdeu!" );
+		updateScoreboard();
 		
 	}
 	
