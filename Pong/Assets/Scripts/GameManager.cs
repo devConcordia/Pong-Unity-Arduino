@@ -1,3 +1,4 @@
+using System.IO.Ports;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -7,18 +8,28 @@ using TMPro;
 public class GameManager : MonoBehaviour
 {
 	
-	[SerializeField] public GameObject ball;
+	/// para utilizar esse recurso é preciso utilizar o .NET Framework
+	/// Edit > Project Settings > Player > Configuration - API Compatibility Level = ".NET Framework"
+	private SerialPort serialPort; // = new SerialPort("COM4", 9600);
+	private Coroutine routineSerialPort;
+	
+	[SerializeField] public GameObject goPlayerLeft;
+	private PlayerLeft playerLeft;
+	
+	[SerializeField] public GameObject goBall;
 	private BallController ballCtrl;
 	
-	[SerializeField] public GameObject hudCanvas;
-	[SerializeField] public GameObject Scoreboard;
+	[SerializeField] public GameObject goHudCanvas;
+	[SerializeField] public GameObject goSerialPort;
+	[SerializeField] public GameObject goScoreboard;
 	private TMP_Text textScoreboard;
+	private TMP_Text textSerialPort;
 	private int scoreLeft = 0;
 	private int scoreRight = 0;
 	
-	[SerializeField] public GameObject managerCanvas;
-	[SerializeField] public GameObject GameMessage;
-	[SerializeField] public GameObject GameHelper;
+	[SerializeField] public GameObject goManagerCanvas;
+	[SerializeField] public GameObject goGameMessage;
+	[SerializeField] public GameObject goGameHelper;
 	private TMP_Text textGameMessage;
 //	private TMP_Text textGameHelper;
 	
@@ -42,11 +53,13 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start() {
         
-		textScoreboard = Scoreboard.GetComponent<TMP_Text>();
-		textGameMessage = GameMessage.GetComponent<TMP_Text>();
-	//	textGameHelper = GameHelper.GetComponent<TMP_Text>();
+		textScoreboard = goScoreboard.GetComponent<TMP_Text>();
+		textSerialPort = goSerialPort.GetComponent<TMP_Text>();
+		textGameMessage = goGameMessage.GetComponent<TMP_Text>();
+	//	textGameHelper = goGameHelper.GetComponent<TMP_Text>();
 		
-		ballCtrl = ball.GetComponent<BallController>();
+		playerLeft = goBall.GetComponent<PlayerLeft>();
+		ballCtrl = goBall.GetComponent<BallController>();
 
 	//	playing = false;
     //   Time.timeScale = .00001f;
@@ -65,12 +78,34 @@ public class GameManager : MonoBehaviour
 			}
 		}
 		
+		
+		if( Input.GetKeyDown(KeyCode.Alpha3) )
+			startSerialPort("COM3");
+		
+		if( Input.GetKeyDown(KeyCode.Alpha4) )
+			startSerialPort("COM4");
+		
+		if( Input.GetKeyDown(KeyCode.Alpha5) )
+			startSerialPort("COM5");
+		
+		if( Input.GetKeyDown(KeyCode.Alpha6) )
+			startSerialPort("COM6");
+		
+		if( Input.GetKeyDown(KeyCode.Alpha7) )
+			startSerialPort("COM7");
+		
+		if( Input.GetKeyDown(KeyCode.Alpha8) )
+			startSerialPort("COM8");
+		
+		if( Input.GetKeyDown(KeyCode.Alpha9) )
+			startSerialPort("COM9");
+		
 	}
 	
 	public void startGame() {
 		
-		hudCanvas.SetActive(true);
-		managerCanvas.SetActive(false);
+		goHudCanvas.SetActive(true);
+		goManagerCanvas.SetActive(false);
 		
 		ballCtrl.reset();
 		ballCtrl.start();
@@ -81,8 +116,8 @@ public class GameManager : MonoBehaviour
 		
 		textGameMessage.text = message;
 		
-		managerCanvas.SetActive(true);
-		GameHelper.SetActive(true);
+		goManagerCanvas.SetActive(true);
+		goGameHelper.SetActive(true);
 		
 		playing = false;
         Time.timeScale = .00001f;
@@ -91,8 +126,8 @@ public class GameManager : MonoBehaviour
 	
 	public void prepareGame() {
 		
-		hudCanvas.SetActive(false);
-		managerCanvas.SetActive(true);
+		goHudCanvas.SetActive(false);
+		goManagerCanvas.SetActive(true);
 		
 		ballCtrl.reset();
 		
@@ -111,7 +146,7 @@ public class GameManager : MonoBehaviour
         
 		//textGameMessage.text = "Prepara ...";
 		
-		GameHelper.SetActive(false);
+		goGameHelper.SetActive(false);
 		
 		int currentTime = 3;
 
@@ -127,7 +162,7 @@ public class GameManager : MonoBehaviour
         textGameMessage.text = "GO!";
 		yield return new WaitForSeconds(1f);
         
-		
+		///
 		startGame();
 		
     }
@@ -137,6 +172,18 @@ public class GameManager : MonoBehaviour
 		
 		textScoreboard.text = scoreLeft +" x "+ scoreRight;
 		
+		int[] leds = { 0, 0, 0, 0 };
+		
+		for( int i = 0; i < scoreLeft; i++ )
+			leds[i] = 1;
+		
+		for( int i = 0; i < scoreRight; i++ )
+			leds[3-i] = 1;
+		
+		///
+		setLEDValues( leds );
+		
+		///
 		if( scoreLeft >= 2 ) {
 			
 			endGame( "Parabéns! Você ganhou!" );
@@ -166,5 +213,91 @@ public class GameManager : MonoBehaviour
 		updateScoreboard();
 		
 	}
+	
+	
+	
+	public void onArduinoReceive( int btnL, int btnR ) {
+		
+		if( btnL == 1 ) playerLeft.moveUp();
+		
+		if( btnR == 1 ) playerLeft.moveDown();
+		
+	}
+	
+	private void startSerialPort( string com, int rate = 57600 ) {
+		
+		textSerialPort.text = com;
+		
+		
+		if( serialPort != null ) 
+			stopSerialPort();
+		
+		serialPort = new SerialPort( com, rate );
+		
+		routineSerialPort = StartCoroutine(ReadSerialPort()); // Start reading the serial port using a coroutine
+		
+	}
+	
+	private void stopSerialPort() {
+		
+		if( serialPort.IsOpen )
+			serialPort.Close(); // Close the serial port when the application quits
+		
+		StopCoroutine(routineSerialPort);
+		
+	}
+	
+	IEnumerator ReadSerialPort()
+	{
+		while( true ) {
+			string data = null;
+			
+			if( serialPort.IsOpen ) {
+				try {
+					
+					// Read a line of data from the serial port
+					data = serialPort.ReadLine();
+					
+					string[] btns = data.Split(';');
+					
+					if( btns.Length == 2 ) {
+						if( int.TryParse(btns[0], out int btnL) && int.TryParse(btns[1], out int btnR) ) {
+							
+							onArduinoReceive( btnL, btnR );
+							
+						}
+					}
+					
+				} catch( System.Exception ) {
+					
+					// Handle any exceptions that occur during reading
+				
+				}
+			}
+			
+			yield return null; // Wait for the next frame
+		
+		}
+	}
+
+	void OnApplicationQuit()
+	{
+		if( serialPort != null && serialPort.IsOpen ) {
+			serialPort.Close(); // Close the serial port when the application quits
+		}
+	}
+	
+	void setLEDValues( int[] leds ) {
+		
+		if( serialPort != null && serialPort.IsOpen && leds.Length == 4 ) {
+            
+			string message = string.Join(";", leds);
+			
+			serialPort.Write( message + "\n" );
+            
+			Debug.Log( message );
+			
+        }
+    }
 	
 }
