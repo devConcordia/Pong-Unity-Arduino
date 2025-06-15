@@ -9,7 +9,7 @@
 
 ///
 int led_pins[4] = { LED_1, LED_2, LED_3, LED_4 };
-
+int leds[4];
 ///
 void setup() {
 	
@@ -34,27 +34,19 @@ void loop() {
 	
 	///
 	writeSerialPort( btnL, btnR );
+	readSerialPort();
 	
-	///
-	int leds = readSerialPort();
-	
-	if( leds != -1 ) 
-		setLeds( leds );
-	
+	delay(5);
+
 }
 
 void writeSerialPort( int btnL, int btnR ) {
 	
-	if( btnL == 1 || btnR == 1 ) {
-		
-		/// 
-		Serial.print( btnL );
-		Serial.print( ";" );
-		Serial.print( btnR );
-		Serial.print( "\n" );
-		
-	}
-	
+	/// 
+	Serial.print( btnL );
+	Serial.print( ";" );
+	Serial.println( btnR );
+
 }
 
 /// 
@@ -62,10 +54,11 @@ int readSerialPort() {
 	
 	if( Serial.available() ) {
 		
-		String data = Serial.readStringUntil('\n'); // lê até encontrar \n
-		data.trim(); // remove espaços e quebras de linha extras
+		// lê até encontrar \n
+		String data = Serial.readStringUntil('\n');
+		// remove espaços e quebras de linha extras
+		data.trim();
 
-		int leds[4];
 		int index = 0;
 
 		while( data.length() > 0 && index < 4 ) {
@@ -95,9 +88,9 @@ int readSerialPort() {
 	
 }
 
-void setLeds( int leds[] ) {
+void setLeds( int values[] ) {
 
 	for( int i = 0; i < 4; i++ )
-		digitalWrite( led_pins[i], leds[i] == 1 ? HIGH : LOW );
+		digitalWrite( led_pins[i], values[i] == 1 ? HIGH : LOW );
 	
 }

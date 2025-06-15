@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
 	
 	/// para utilizar esse recurso é preciso utilizar o .NET Framework
 	/// Edit > Project Settings > Player > Configuration - API Compatibility Level = ".NET Framework"
-	private SerialPort serialPort; // = new SerialPort("COM4", 9600);
+	private SerialPort serialPort;
 	private Coroutine routineSerialPort;
 	
 	[SerializeField] public GameObject goPlayerLeft;
@@ -58,7 +58,7 @@ public class GameManager : MonoBehaviour
 		textGameMessage = goGameMessage.GetComponent<TMP_Text>();
 	//	textGameHelper = goGameHelper.GetComponent<TMP_Text>();
 		
-		playerLeft = goBall.GetComponent<PlayerLeft>();
+		playerLeft = goPlayerLeft.GetComponent<PlayerLeft>();
 		ballCtrl = goBall.GetComponent<BallController>();
 
 	//	playing = false;
@@ -233,8 +233,12 @@ public class GameManager : MonoBehaviour
 			stopSerialPort();
 		
 		serialPort = new SerialPort( com, rate );
+		serialPort.ReadTimeout = 5;
+		serialPort.Open();
 		
 		routineSerialPort = StartCoroutine(ReadSerialPort()); // Start reading the serial port using a coroutine
+		
+	//	Debug.Log( com +": "+ serialPort.IsOpen );
 		
 	}
 	
@@ -252,12 +256,14 @@ public class GameManager : MonoBehaviour
 		while( true ) {
 			string data = null;
 			
-			if( serialPort.IsOpen ) {
+			if( serialPort.IsOpen && serialPort.BytesToRead > 0 ) {
 				try {
 					
 					// Read a line of data from the serial port
 					data = serialPort.ReadLine();
 					
+					//Debug.Log( data );
+			
 					string[] btns = data.Split(';');
 					
 					if( btns.Length == 2 ) {
@@ -268,10 +274,10 @@ public class GameManager : MonoBehaviour
 						}
 					}
 					
-				} catch( System.Exception ) {
-					
-					// Handle any exceptions that occur during reading
-				
+				} catch( System.TimeoutException ) {
+						// Timeout? Ignora e segue.
+				} catch( System.Exception e ) {
+					Debug.LogError(e);
 				}
 			}
 			
@@ -295,7 +301,7 @@ public class GameManager : MonoBehaviour
 			
 			serialPort.Write( message + "\n" );
             
-			Debug.Log( message );
+		//	Debug.Log( message );
 			
         }
     }

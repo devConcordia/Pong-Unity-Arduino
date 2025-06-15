@@ -31,7 +31,7 @@ public class BallController : MonoBehaviour
 	
 	public void start() {
 		
-		body.linearVelocity = new Vector2(Random.Range(-1f, 1f), 1).normalized * speed;
+		body.linearVelocity = new Vector2(Random.Range(-1f, 1f), Random.Range(-.25f, .25f)).normalized * speed;
 		
 	}
 	

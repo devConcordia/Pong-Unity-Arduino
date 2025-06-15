@@ -1613,9 +1613,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1423500107}
   - component: {fileID: 1423500106}
-  - component: {fileID: 1423500109}
   - component: {fileID: 1423500108}
   - component: {fileID: 1423500110}
+  - component: {fileID: 1423500111}
   m_Layer: 0
   m_Name: PlayerLeft
   m_TagString: PlayerLeft
@@ -1720,8 +1720,21 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 5
---- !u!61 &1423500109
-BoxCollider2D:
+--- !u!114 &1423500110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1423500105}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5997f7fefd029534dbcf636505401ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 3.5
+--- !u!70 &1423500111
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1755,30 +1768,8 @@ BoxCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
---- !u!114 &1423500110
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1423500105}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5997f7fefd029534dbcf636505401ffb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 3.5
+  m_Direction: 0
 --- !u!1 &1478829287
 GameObject:
   m_ObjectHideFlags: 0
@@ -2072,8 +2063,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ball: {fileID: 281878160}
   speed: 3.5
---- !u!61 &1484321421
-BoxCollider2D:
+--- !u!70 &1484321421
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -2107,17 +2098,8 @@ BoxCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
+  m_Direction: 0
 --- !u!1 &1578109596
 GameObject:
   m_ObjectHideFlags: 0
