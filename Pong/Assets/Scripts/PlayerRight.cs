@@ -1,7 +1,6 @@
 using UnityEngine;
 
-public class PlayerRight : MonoBehaviour
-{
+public class PlayerRight : MonoBehaviour {
 	
 	[SerializeField] public GameObject ball;
 	[SerializeField] public float speed = 2;
@@ -9,23 +8,21 @@ public class PlayerRight : MonoBehaviour
 	private Rigidbody2D body;
 	
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
+    void Start() {
         
 		body = GetComponent<Rigidbody2D>();
 		
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
-    {
+    // 
+    void FixedUpdate() {
         
+		/// obtem a distancia entre o objeto e a bola no eixo x
 		float dy = ball.transform.position.y - transform.position.y;
 		
+		/// move objeto em direção a posição y da bola
 		body.linearVelocityY = dy * speed;
 		
     }
-	
-	
 	
 }

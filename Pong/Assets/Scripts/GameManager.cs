@@ -5,8 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using TMPro;
 
-public class GameManager : MonoBehaviour
-{
+public class GameManager : MonoBehaviour {
 	
 	/// para utilizar esse recurso é preciso utilizar o .NET Framework
 	/// Edit > Project Settings > Player > Configuration - API Compatibility Level = ".NET Framework"
@@ -31,18 +30,21 @@ public class GameManager : MonoBehaviour
 	[SerializeField] public GameObject goGameMessage;
 	[SerializeField] public GameObject goGameHelper;
 	private TMP_Text textGameMessage;
-//	private TMP_Text textGameHelper;
 	
-	
-	
+	/// criamos uma referencia estatica para ser acessada 
+	/// pela bola quando ela colidir com um goal, e assim 
+	/// atualizar o placar
 	public static GameManager Instance = null;
 	
+	/// identifica se está em jogo ou aguardando iniciar
 	public bool playing = false;
 	
+	/// invocado quando o objeto é criado
     private void Awake() {
 		
+		// Evita duplicação
         if (Instance != null && Instance != this) {
-            Destroy(gameObject); // Evita duplicação
+            Destroy(gameObject);
             return;
         }
 
@@ -56,13 +58,9 @@ public class GameManager : MonoBehaviour
 		textScoreboard = goScoreboard.GetComponent<TMP_Text>();
 		textSerialPort = goSerialPort.GetComponent<TMP_Text>();
 		textGameMessage = goGameMessage.GetComponent<TMP_Text>();
-	//	textGameHelper = goGameHelper.GetComponent<TMP_Text>();
 		
 		playerLeft = goPlayerLeft.GetComponent<PlayerLeft>();
 		ballCtrl = goBall.GetComponent<BallController>();
-
-	//	playing = false;
-    //   Time.timeScale = .00001f;
 		
 		prepareGame();
 		
@@ -78,6 +76,9 @@ public class GameManager : MonoBehaviour
 			}
 		}
 		
+		/// a seguir identificamos quando uma tecla (acima do teclado)
+		/// de um numero (3 ao 9) é pressionada, e iniciamos uma 
+		/// a conexão com a porta COM desse numero
 		
 		if( Input.GetKeyDown(KeyCode.Alpha3) )
 			startSerialPort("COM3");
@@ -102,50 +103,62 @@ public class GameManager : MonoBehaviour
 		
 	}
 	
-	public void startGame() {
+	/** OnApplicationQuit
+	 *	
+	 *	Método invocado quando a aplicação encerrar
+	 *	
+	 */
+	void OnApplicationQuit() {
 		
-		goHudCanvas.SetActive(true);
-		goManagerCanvas.SetActive(false);
-		
-		ballCtrl.reset();
-		ballCtrl.start();
-		
-	}
-	
-	public void endGame( string message ) {
-		
-		textGameMessage.text = message;
-		
-		goManagerCanvas.SetActive(true);
-		goGameHelper.SetActive(true);
-		
-		playing = false;
-        Time.timeScale = .00001f;
+		/// verifica se há conexão com alguma porta serial
+		if( serialPort != null && serialPort.IsOpen ) {
+			
+			/// encerra comunicação com a porta serial
+			serialPort.Close();
+			
+		}
 		
 	}
 	
+	
+	/** prepareGame
+	 *	
+	 *	Zera placar e prepara o proximo jogo, então inica uma contagem regressiva.
+	 *	Chamado quando playing for false e o jogador pressionar Space.
+	 *	playing é definido como true e o tempo volta a correr normalmente.
+	 *	
+	 */
 	public void prepareGame() {
 		
+		/// altera os canvas
 		goHudCanvas.SetActive(false);
 		goManagerCanvas.SetActive(true);
 		
+		/// remove a movimentação e reposiciona a bola
 		ballCtrl.reset();
 		
+		/// zera placar
 		scoreLeft = 0;
 		scoreRight = 0;
 		updateScoreboard();
 		
+		/// altera status do jogo
 		playing = true;
         Time.timeScale = 1f;
 		
+		/// inicia a contagem regressiva
 		StartCoroutine( startGameCountdown() );
 		
 	}
 	
+	/** startGameCountdown
+	 *	
+	 *	Contagem regressiva antes de chamar o startGame.
+	 *	Deverá ser chamado com o metodo StartCoroutine();
+	 *
+	 */
     IEnumerator startGameCountdown() {
         
-		//textGameMessage.text = "Prepara ...";
-		
 		goGameHelper.SetActive(false);
 		
 		int currentTime = 3;
@@ -167,23 +180,73 @@ public class GameManager : MonoBehaviour
 		
     }
 	
+	/** startGame
+	 *	
+	 *	Inicia um novo jogo, chamado ao final da contagem regressiva do prepareGame().
+	 *	
+	 */
+	public void startGame() {
+		
+		/// altera os canvas
+		goHudCanvas.SetActive(true);
+		goManagerCanvas.SetActive(false);
+		
+		/// remove a movimentação e reposiciona a bola
+		ballCtrl.reset();
+		
+		/// inicia movimentação aleatoria da bola 
+		ballCtrl.startMove();
+		
+	}
 	
+	/** endGame
+	 *	
+	 *	Encerra o jogo e exibe a mensagem (derrota ou vitoria).
+	 *	playing é alterado para false e o tempo é reduzido (para a execução).
+	 *	
+	 */
+	public void endGame( string message ) {
+		
+		/// exibe mensagem (derrota ou vitoria)
+		textGameMessage.text = message;
+		
+		/// altera os canvas
+		goManagerCanvas.SetActive(true);
+		goGameHelper.SetActive(true);
+		
+		/// altera status do jogo
+		playing = false;
+        Time.timeScale = .00001f;
+		
+	}
+	
+	/** updateScoreboard
+	 *	
+	 *	Atualiza placar no HUD do jogo e calcula os leds 
+	 *	que precisam estar acessos e chama o metodo setLEDValues
+	 *	para escrever na porta serial
+	 *	
+	 */
 	public void updateScoreboard() {
 		
+		/// atualiza texto do HUD 
 		textScoreboard.text = scoreLeft +" x "+ scoreRight;
 		
+		/// inicia variavel dos estados dos LEDs
 		int[] leds = { 0, 0, 0, 0 };
 		
+		/// define pontuação do jogador esquerdo
 		for( int i = 0; i < scoreLeft; i++ )
 			leds[i] = 1;
 		
+		/// define pontuação do jogador direito
 		for( int i = 0; i < scoreRight; i++ )
 			leds[3-i] = 1;
 		
-		///
+		/// escreve na porta serial os valores dos LEDs
 		setLEDValues( leds );
 		
-		///
+		/// verifica se há jogador vencedor e encerra jogo
 		if( scoreLeft >= 2 ) {
 			
 			endGame( "Parabéns! Você ganhou!" );
@@ -194,12 +257,19 @@ public class GameManager : MonoBehaviour
 			
 		} else {
 			
+			/// se não houve vencedor e o jogo ainda está sendo executado
+			/// inicia nova partida imediatamente (sem contagem regressiva)
 			if( playing ) startGame();
 			
 		}
 		
 	}
 	
+	/** addLeftPoint
+	 *	
+	 *	Adiciona pontos ao jogador da esquerda e chama updateScoreboard
+	 *	
+	 */
 	public void addLeftPoint() {
 		
 		scoreLeft++;
@@ -207,6 +277,11 @@ public class GameManager : MonoBehaviour
 		
 	}
 	
+	/** addRightPoint
+	 *	
+	 *	Adiciona pontos ao jogador da direita e chama updateScoreboard
+	 *	
+	 */
 	public void addRightPoint() {
 		
 		scoreRight++;
@@ -215,7 +290,12 @@ public class GameManager : MonoBehaviour
 	}
 	
 	
-	
+	/** onArduinoReceive
+	 *	
+	 *	Esse método move o jogador esquerdo quando haver 
+	 *	conteudo lido na porta serial que acontece em ReadSerialPort.
+	 *	
+	 */
 	public void onArduinoReceive( int btnL, int btnR ) {
 		
 		if( btnL == 1 ) playerLeft.moveUp();
@@ -224,86 +304,121 @@ public class GameManager : MonoBehaviour
 		
 	}
 	
+	
+	/** startSerialPort
+	 *	
+	 *	Inicia uma nova conexão e leitura de uma porta COM
+	 *	
+	 */
 	private void startSerialPort( string com, int rate = 57600 ) {
 		
+		/// atualiza HUD
 		textSerialPort.text = com;
 		
-		
+		/// fecha a ultima porta aberta
 		if( serialPort != null ) 
 			stopSerialPort();
 		
+		/// inicia porta serial
 		serialPort = new SerialPort( com, rate );
+		
+		/// define o tempo maximo de espera de alguma mensagem
 		serialPort.ReadTimeout = 5;
+		
+		/// inicoa comunicação
 		serialPort.Open();
 		
-		routineSerialPort = StartCoroutine(ReadSerialPort()); // Start reading the serial port using a coroutine
-		
-	//	Debug.Log( com +": "+ serialPort.IsOpen );
+		/// inicia leitura da porta serial utilizando o coroutine
+		routineSerialPort = StartCoroutine(ReadSerialPort()); 
 		
 	}
 	
+	/** stopSerialPort
+	 *	
+	 *	Encerra conexão e leitura da porta COM
+	 *	
+	 */
 	private void stopSerialPort() {
 		
+		/// fecha se porta atual estiver aberta
 		if( serialPort.IsOpen )
-			serialPort.Close(); // Close the serial port when the application quits
+			serialPort.Close();
 		
+		/// encerra coroutine da leitura da porta serial
 		StopCoroutine(routineSerialPort);
 		
 	}
 	
-	IEnumerator ReadSerialPort()
-	{
+	/** ReadSerialPort
+	 *	
+	 *	Coroutine para leitura da porta serial.
+	 *	Devera ser chamada com StartCoroutine e devera ser 
+	 *	encerrada com StopCoroutine, quando a porta for fechada.
+	 *	
+	 */
+	IEnumerator ReadSerialPort() {
+		
 		while( true ) {
+			
 			string data = null;
 			
 			if( serialPort.IsOpen && serialPort.BytesToRead > 0 ) {
 				try {
 					
-					// Read a line of data from the serial port
+					/// Realiza uma leitura do conteudo da porta serial,
+					/// o conteudo será lido até a quabra de linha
 					data = serialPort.ReadLine();
 					
-					//Debug.Log( data );
-			
+					/// obtem os dados que veio do arduino e separa pelo ';'
 					string[] btns = data.Split(';');
 					
+					/// se a quantidade separada for igual ao esperado (0;0)
 					if( btns.Length == 2 ) {
+						
+						/// tenta converter os dados em int
 						if( int.TryParse(btns[0], out int btnL) && int.TryParse(btns[1], out int btnR) ) {
 							
+							/// realiza as operações de movimentação
 							onArduinoReceive( btnL, btnR );
 							
 						}
 					}
 					
 				} catch( System.TimeoutException ) {
-						// Timeout? Ignora e segue.
+					
+					/// Ignora as falhas de timeout
+					
 				} catch( System.Exception e ) {
-					Debug.LogError(e);
+					
+					/// escreve no log outros erros de conexão com a porta serial
+					Debug.LogError( e );
+					
 				}
 			}
 			
-			yield return null; // Wait for the next frame
+			/// espera o proximo frame
+			yield return null;
 		
 		}
-	}
-
-	void OnApplicationQuit()
-	{
-		if( serialPort != null && serialPort.IsOpen ) {
-			serialPort.Close(); // Close the serial port when the application quits
-		}
+		
 	}
 	
+	/** setLEDValues
+	 *	
+	 *	Metodo escreve os valores dos LEDs na porta serial
+	 *	
+	 */
 	void setLEDValues( int[] leds ) {
 		
+		/// verifica se a conexão com a porta serial foi aberta
+		/// e se a quantidade de informações de LEDs é a correta
 		if( serialPort != null && serialPort.IsOpen && leds.Length == 4 ) {
             
-			string message = string.Join(";", leds);
-			
-			serialPort.Write( message + "\n" );
+			/// envia para o arduino as informações da porta serial 
+			serialPort.Write( string.Join(";", leds) +"\n" );
             
-		//	Debug.Log( message );
-			
         }
+		
     }
 	
 }
