@@ -19,7 +19,7 @@ int leds[4];
 void setup() {
 	
 	/// inicia a porta serial
-	Serial.begin( 57600 );
+	Serial.begin( 19200 );
 	
 	/// incia os pinos dos botões como entrada PULLUP
 	pinMode( BTN_L, INPUT_PULLUP );
@@ -51,8 +51,9 @@ void loop() {
 	/// como o loop do arduino é muito rapido causava
 	/// legs na excução do Jogo na Unity então usamos
 	/// o delay para forçar a redução da transmissão
-	delay(5);
-
+	//delay(5);
+	/// o delay pode ser removido depois de mudar a taxa de transmissão para 19200
+	
 }
 
 /** writeSerialPort

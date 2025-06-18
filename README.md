@@ -35,9 +35,9 @@ Pinagem
 - Os pinos utilizados pelos botões são os 10 (esquerdo) e 11 (direito);
 - Os pinos utilizados pelos LEDs são os 6, 7, 8 e 9.
 
-No setup a porta serial deverá ser iniciado com a taxa de transferência igual a 57600, os pinos dos botões deverão ser configurados como INPUT_PULLUP e os pinos dos LEDs como OUTPUT.
+No setup a porta serial deverá ser iniciado com a taxa de transferência igual a 19200, os pinos dos botões deverão ser configurados como INPUT_PULLUP e os pinos dos LEDs como OUTPUT.
 
-No final do loop há delay de 5 milissegundos para evitar que ocorra sobrecarga na aplicação do Unity. Nos testes que não havia esse controle a aplicação no Unity apresentava lentidão.
+<!-- No final do loop há delay de 5 milissegundos para evitar que ocorra sobrecarga na aplicação do Unity. Nos testes que não havia esse controle a aplicação no Unity apresentava lentidão. -->
 
 Foi implementado 3 métodos: writeSerialPort, readSerialPort e setLeds.
 

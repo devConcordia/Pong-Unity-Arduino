@@ -80,26 +80,28 @@ public class GameManager : MonoBehaviour {
 		/// de um numero (3 ao 9) é pressionada, e iniciamos uma 
 		/// a conexão com a porta COM desse numero
 		
+		int rate = 19200;
+		
 		if( Input.GetKeyDown(KeyCode.Alpha3) )
-			startSerialPort("COM3");
+			startSerialPort("COM3",rate);
 		
 		if( Input.GetKeyDown(KeyCode.Alpha4) )
-			startSerialPort("COM4");
+			startSerialPort("COM4",rate);
 		
 		if( Input.GetKeyDown(KeyCode.Alpha5) )
-			startSerialPort("COM5");
+			startSerialPort("COM5",rate);
 		
 		if( Input.GetKeyDown(KeyCode.Alpha6) )
-			startSerialPort("COM6");
+			startSerialPort("COM6",rate);
 		
 		if( Input.GetKeyDown(KeyCode.Alpha7) )
-			startSerialPort("COM7");
+			startSerialPort("COM7",rate);
 		
 		if( Input.GetKeyDown(KeyCode.Alpha8) )
-			startSerialPort("COM8");
+			startSerialPort("COM8",rate);
 		
 		if( Input.GetKeyDown(KeyCode.Alpha9) )
-			startSerialPort("COM9");
+			startSerialPort("COM9",rate);
 		
 	}
 	
@@ -323,7 +325,7 @@ public class GameManager : MonoBehaviour {
 		serialPort = new SerialPort( com, rate );
 		
 		/// define o tempo maximo de espera de alguma mensagem
-		serialPort.ReadTimeout = 5;
+		serialPort.ReadTimeout = 1;
 		
 		/// inicoa comunicação
 		serialPort.Open();
